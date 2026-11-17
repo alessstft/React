@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import RequestForm from './components/RequestForm'
 import RequestCard from './components/RequestCard'
-import { nextStatus, type NewRequest, type RequestItem, type Status } from './requests'
-import { loadRequests, saveRequests } from './storage'
+import type { NewRequest, Status } from './requests'
+import { useRequests } from './useRequests'
 import { sendRequest } from './notify'
 
 type Filter = 'Все' | Status
@@ -11,45 +11,67 @@ type Filter = 'Все' | Status
 const FILTERS: Filter[] = ['Все', 'Новая', 'В работе', 'Готово']
 
 function App() {
-  const [requests, setRequests] = useState(loadRequests)
+  // Все данные и запросы к серверу приходят из хука, здесь я отвечаю только за экран
+  const { requests, loading, error, retry, add, next, remove } = useRequests()
   const [filter, setFilter] = useState<Filter>('Все')
   const [notice, setNotice] = useState('')
 
-  // Считаю при каждой отрисовке: это производные данные, в состояние их не кладу
   const newCount = requests.filter((r) => r.status === 'Новая').length
   const visible = filter === 'Все' ? requests : requests.filter((r) => r.status === filter)
 
-  // Все изменения идут через одну функцию, чтобы состояние и localStorage не расходились
-  function update(list: RequestItem[]) {
-    setRequests(list)
-    saveRequests(list)
-  }
+  // Заголовок вкладки живёт вне React, поэтому синхронизирую его эффектом
+  useEffect(() => {
+    document.title = `Новых: ${newCount} · Доска заявок`
+  }, [newCount])
 
-  function handleNext(id: number) {
-    const updated = requests.map((r) => {
-      if (r.id === id) {
-        return { ...r, status: nextStatus(r.status) }
+  useEffect(() => {
+    if (notice === '') {
+      return
+    }
+    const timer = setTimeout(() => setNotice(''), 5000)
+    return () => clearTimeout(timer)
+  }, [notice])
+
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setFilter('Все')
       }
-      return r
-    })
-    update(updated)
-  }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [])
 
-  async function handleAdd(data: NewRequest) {
-    const created: RequestItem = { ...data, id: Date.now(), status: 'Новая' }
-    // Сначала заявка на доску, потом уведомление: при выключенном n8n доска не ломается
-    update([created, ...requests])
-    setNotice('Заявка добавлена. Отправляем уведомление…')
-    const sent = await sendRequest(created)
-    if (sent) {
-      setNotice('Заявка добавлена, уведомление отправлено.')
-    } else {
-      setNotice('Заявка добавлена, но уведомление не отправлено: сервер автоматизации недоступен.')
+  async function handleNext(id: string, status: Status) {
+    try {
+      await next(id, status)
+    } catch (e) {
+      setNotice((e as Error).message)
     }
   }
 
-  function handleRemove(id: number) {
-    update(requests.filter((r) => r.id !== id))
+  async function handleAdd(data: NewRequest) {
+    try {
+      // Сначала база, потом уведомление: в n8n уходит уже сохранённая заявка с id
+      const created = await add(data)
+      setNotice('Заявка добавлена. Отправляем уведомление…')
+      const sent = await sendRequest(created)
+      if (sent) {
+        setNotice('Заявка добавлена, уведомление отправлено.')
+      } else {
+        setNotice('Заявка добавлена, но уведомление не отправлено: сервер автоматизации недоступен.')
+      }
+    } catch (e) {
+      setNotice((e as Error).message)
+    }
+  }
+
+  async function handleRemove(id: string) {
+    try {
+      await remove(id)
+    } catch (e) {
+      setNotice((e as Error).message)
+    }
   }
 
   return (
@@ -67,7 +89,14 @@ function App() {
               </button>
             ))}
           </div>
-          {visible.length === 0 && <p className="empty">Заявок с таким статусом нет</p>}
+          {loading && <p className="empty">Загрузка заявок…</p>}
+          {error !== '' && (
+            <div className="load-error">
+              <p>{error}</p>
+              <button onClick={retry}>Повторить</button>
+            </div>
+          )}
+          {!loading && error === '' && visible.length === 0 && <p className="empty">Заявок с таким статусом нет</p>}
           {visible.map((r) => (
             <RequestCard
               key={r.id}
@@ -76,7 +105,7 @@ function App() {
               category={r.category}
               details={r.details}
               status={r.status}
-              onNext={() => handleNext(r.id)}
+              onNext={() => handleNext(r.id, r.status)}
               onRemove={() => handleRemove(r.id)}
             />
           ))}
