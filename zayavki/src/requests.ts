@@ -25,7 +25,6 @@ export function nextStatus(status: Status): Status {
   return 'Готово'
 }
 
-// Ответ на мой запрос и событие с сервера не должны дать две одинаковые карточки
 export function upsertRequest(list: RequestItem[], item: RequestItem): RequestItem[] {
   if (list.some((r) => r.id === item.id)) {
     return list.map((r) => (r.id === item.id ? item : r))

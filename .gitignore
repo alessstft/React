@@ -1,4 +1,3 @@
-# Logs
 logs
 *.log
 npm-debug.log*
@@ -12,12 +11,10 @@ dist
 dist-ssr
 *.local
 
-# Секреты автоматизации (токен бота, пароли)
 .env
 .env.local
 avtomatizaciya/.env
 
-# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea

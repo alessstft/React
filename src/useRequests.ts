@@ -10,7 +10,6 @@ export function useRequests() {
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
-    // Ответ очищенного запуска эффекта (StrictMode) не должен попасть в состояние
     let ignore = false
     async function load() {
       try {
@@ -33,7 +32,6 @@ export function useRequests() {
     }
   }, [attempt])
 
-  // Подписка живёт, пока доска на экране; эффект сразу возвращает функцию отписки
   useEffect(() => {
     return subscribeRequests(({ action, record }) => {
       if (action === 'delete') {

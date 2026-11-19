@@ -2,7 +2,6 @@ import type { NewRequest, RequestItem, Status } from './requests'
 
 const API_URL = 'http://localhost:8090/api/collections/requests/records'
 
-// Оба вида неудач превращаю в понятную ошибку: сервер не ответил или отклонил запрос
 async function callApi(url: string, options?: RequestInit): Promise<Response> {
   let response: Response
   try {
