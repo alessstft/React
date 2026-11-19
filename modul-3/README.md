@@ -1,7 +1,7 @@
 # Модуль 3 · Несколько экранов, публикация, расписание
 
 Продолжение моей работы: первый модуль уже на GitHub, второй — в отдельной
-ветке, третий добавляю этой папкой. Занималась главами 3.1–3.4, проектом П3
+ветке, третий добавила этой папкой. Занималась главами 3.1–3.4, проектом П3
 и автоматизацией А3. Проверочную работу сдаю отдельно, в репозиторий не включаю.
 
 В модуле две части: доска заявок `zayavki` получает страницы и контекст,
@@ -15,7 +15,7 @@
 | [3.2](https://maximbytecamp.github.io/angular_react_makarov/temy/32-kontekst/index.html) | Контекст | `board.ts` и `BoardProvider.tsx`, хук `useBoard`, `App.tsx` сократился до маршрутов |
 | [3.3](https://maximbytecamp.github.io/angular_react_makarov/temy/33-github-pages/index.html) | Сборка и Pages | приложение `monitoring`, `dist`, `base`, `BASE_URL`, конвейер `deploy.yml` |
 | [3.4](https://maximbytecamp.github.io/angular_react_makarov/temy/34-github-actions/index.html) | Расписание | `scripts/check.mjs`, `results.json`, `check.yml` с ночным запуском и публикацией |
-| [П3](https://maximbytecamp.github.io/angular_react_makarov/temy/39-proekt-monitoring/index.html) | Проект | многостраничный монитор с контекстом и историей проверок |
+| [П3](https://maximbytecamp.github.io/angular_react_makarov/temy/39-proekt-monitoring/index.html) | Проект | многостраничный монитор с контекстом, историей проверок и тремя дополнительными заданиями |
 | [А3](https://maximbytecamp.github.io/angular_react_makarov/temy/38-opoveshchenie/index.html) | Автоматизация | сообщение в Telegram только при изменениях, секреты репозитория |
 
 ## Доска заявок: что изменилось
@@ -43,8 +43,8 @@ monitoring/
 ├── .github/workflows/deploy.yml    публикация + 404.html + workflow_call
 ├── .github/workflows/check.yml     ночная проверка, секреты, задание publish
 ├── scripts/check.mjs               обход сайтов, история, notify в Telegram
-├── public/data/sites.json          список сайтов
-├── public/data/results.json        история из 30 проверок
+├── public/data/sites.json          семь сайтов, у каждого id латиницей
+├── public/data/results.json        три пробные проверки
 ├── src/monitoring.ts               контекст и useMonitoring
 ├── src/MonitoringProvider.tsx      загрузка sites.json и results.json
 ├── src/status.ts                   текст статуса
@@ -58,29 +58,33 @@ monitoring/
 после сборки делается `cp dist/index.html dist/404.html` — так прямые ссылки
 открываются на Pages.
 
+Дополнительно сделала три задания из §4: долю удачных проверок на карточке,
+кнопку «Только неработающие» и полосы времени ответа в таблице истории.
+
 ## Проверка
 
 ```
 npm run build   → успешно в zayavki и monitoring
 npm run lint    → 0 ошибок, 0 предупреждений в обоих
-node scripts/check.mjs → 5 сайтов ответили 200, два дали 404
+node scripts/check.mjs → 6 сайтов ответили 200, один дал 404, история из 3 проверок
 ```
 
-В браузере прошла: доска `/`, статистика `/stats` с двумя таблицами,
-страница заявки `/requests/…`, «Страница не найдена» на `/abc`;
-в собранном мониторе — сводку, страницу сайта с историей, «О проверке»
-и неизвестный адрес. Консоль без ошибок.
+В браузере прошла: доску `/`, статистику `/stats` с двумя таблицами,
+страницу заявки `/requests/…`, «Страница не найдена» на `/abc`;
+в собранном мониторе — сводку, фильтр, страницу сайта с историей,
+«О проверке» и неизвестный адрес. Консоль без ошибок.
 
 ## Что осталось сделать перед защитой
 
-1. Заменить `sites.json` на адреса сайтов моей группы: сейчас там справочники
-   из примера и один тестовый неработающий адрес для проверки оповещения.
-2. Вынести `monitoring` в отдельный публичный репозиторий, включить
-   Settings → Pages → Source: GitHub Actions, создать секреты
-   `TELEGRAM_TOKEN` и `TELEGRAM_CHAT_ID`.
-3. Запустить ночную проверку кнопкой **Run workflow**, снять снимок сообщения
-   бота и проверить прямую ссылку на страницу сайта в новой вкладке и после F5.
-4. Вписать ФИО и группу в отчёт, удалить `node_modules` и `dist` перед архивом.
+1. Создать в репозитории `monitoring` секреты `TELEGRAM_TOKEN` и
+   `TELEGRAM_CHAT_ID` и запустить «Ночную проверку сайтов» кнопкой
+   **Run workflow** — появится коммит бота и новая публикация.
+2. Снять снимок сообщения бота о неработающем сайте.
+3. После публикации открыть прямую ссылку на страницу сайта в новой
+   вкладке и проверить F5.
+4. Отправить изменения на GitHub — я держу их локально.
+5. Если преподаватель попросит именно мониторы однокурсников, заменить
+   две-три строки в `sites.json` на их адреса.
 
-Подробности по автоматизации — в `..\monitoring\README.md` и
-`..\avtomatizaciya\README.md`.
+Ответы на вопросы защиты — в
+`..\projects\p3-monitoring\Подготовка к защите.md`.

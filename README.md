@@ -25,7 +25,7 @@ Angular и react/
 ├── Отчёт по модулю 3.md
 ├── modul-2/README.md                главы 2.1–2.5 и чек-лист П2
 ├── modul-3/README.md                главы 3.1–3.4, П3 и А3
-├── projects/p3-monitoring/          README и журнал для сдачи проекта П3
+├── projects/p3-monitoring/          README, ai-log и подготовка к защите
 ├── zayavki/                         доска заявок, основная рабочая папка
 │   ├── src/pages/                   BoardPage, StatsPage, RequestPage, NotFoundPage
 │   ├── src/board.ts, BoardProvider.tsx
@@ -99,11 +99,13 @@ npm 11.20.0, Vite 8.3.8, React 19.3.1, TypeScript 7.0.2, Oxlint 1.94.0 —
 
 ## Что осталось перед защитой
 
-1. Заменить `monitoring/public/data/sites.json` на адреса сайтов моей группы.
-2. Вынести `monitoring` в отдельный публичный репозиторий, включить
-   Settings → Pages → Source: GitHub Actions и создать секреты
-   `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`.
-3. Снять снимок сообщения бота и проверить прямую ссылку на страницу сайта
+1. Создать в репозитории `monitoring` секреты `TELEGRAM_TOKEN` и
+   `TELEGRAM_CHAT_ID` и запустить Actions → «Ночная проверка сайтов» →
+   **Run workflow**.
+2. Снять снимок сообщения бота и проверить прямую ссылку на страницу сайта
    в новой вкладке и после F5.
-4. Удалить `node_modules` и `dist` перед архивом.
-5. Отправить третий модуль на GitHub — команды держу отдельно, сделаю сама.
+3. Удалить `node_modules` и `dist` перед архивом.
+4. Отправить изменения на GitHub — я держу их локально и залью сама.
+
+Ответы на вопросы защиты и чек-лист показа —
+в `projects\p3-monitoring\Подготовка к защите.md`.
