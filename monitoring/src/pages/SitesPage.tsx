@@ -1,47 +1,77 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useMonitoring } from '../monitoring'
+import { sitesWord } from '../plural'
 import { statusText } from '../status'
 
 function SitesPage() {
-  const { sites, history } = useMonitoring()
-  const [onlyBad, setOnlyBad] = useState(false)
+  const { sites, history, loading, error } = useMonitoring()
+  const [query, setQuery] = useState('')
+  const [onlyDown, setOnlyDown] = useState(false)
+
+  if (loading) {
+    return (
+      <p className="empty" role="status">
+        Загрузка результатов…
+      </p>
+    )
+  }
+  if (error !== '') {
+    return (
+      <p className="load-error" role="alert">
+        {error}
+      </p>
+    )
+  }
+
   const last = history[0]
-  const bad = sites.filter((site) => last?.checks.find((c) => c.id === site.id)?.ok !== true).length
-  const shown = onlyBad ? sites.filter((site) => last?.checks.find((c) => c.id === site.id)?.ok !== true) : sites
+  const down = sites.filter((site) => !last?.checks.find((c) => c.id === site.id)?.ok).length
+  let summary = `Все ${sites.length} ${sitesWord(sites.length)} открываются`
+  if (last === undefined) {
+    summary = 'Проверок ещё не было'
+  } else if (down > 0) {
+    summary = `Не открываются: ${down} из ${sites.length}`
+  }
+
+  const shown = sites.filter((site) => {
+    const ok = last?.checks.find((c) => c.id === site.id)?.ok
+    return site.name.toLowerCase().includes(query.trim().toLowerCase()) && (!onlyDown || !ok)
+  })
 
   return (
-    <section>
-      <h2>Сайты группы</h2>
-      <p className="summary">
-        {bad === 0
-          ? `Все ${sites.length} сайтов открываются`
-          : `Не открываются: ${bad} из ${sites.length}`}
+    <>
+      <title>Сайты · Мониторинг сайтов группы</title>
+      <p className={last !== undefined && down > 0 ? 'summary summary--bad' : 'summary'}>
+        {summary}
       </p>
-      <button className="filter-button" onClick={() => setOnlyBad(!onlyBad)}>
-        {onlyBad ? 'Показать все сайты' : 'Только неработающие'}
-      </button>
-      <ul className="sites">
+      <div className="filters">
+        <label>
+          Поиск по названию
+          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </label>
+        <label>
+          <input type="checkbox" checked={onlyDown} onChange={(e) => setOnlyDown(e.target.checked)} />
+          Только неработающие
+        </label>
+      </div>
+      {shown.length === 0 && <p className="empty">Сайтов не найдено</p>}
+      <div className="sites">
         {shown.map((site) => {
           const check = last?.checks.find((c) => c.id === site.id)
           const rates = history.map((run) => run.checks.find((c) => c.id === site.id))
           const okCount = rates.filter((c) => c?.ok === true).length
           const percent = rates.length === 0 ? 0 : Math.round((okCount / rates.length) * 100)
           return (
-            <li key={site.id} className={check?.ok ? 'site' : 'site site--bad'}>
+            <Link key={site.id} to={`/site/${site.id}`} className={check?.ok ? 'site' : 'site site--bad'}>
+              <h2>{site.name}</h2>
               <span className="site__status">{statusText(check)}</span>
-              <h3>
-                <Link to={`/site/${site.id}`}>{site.name}</Link>
-              </h3>
-              <a href={site.url} target="_blank" rel="noreferrer">
-                {site.url}
-              </a>
+              <span className="site__url">{site.url}</span>
               <span className="site__rate">открывался в {percent}% проверок</span>
-            </li>
+            </Link>
           )
         })}
-      </ul>
-    </section>
+      </div>
+    </>
   )
 }
 

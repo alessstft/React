@@ -3,16 +3,27 @@ import { useMonitoring } from '../monitoring'
 import { statusText } from '../status'
 
 function SitePage() {
-  const { sites, history } = useMonitoring()
   const { id } = useParams()
-  const site = sites.find((s) => s.id === id)
+  const { sites, history, loading } = useMonitoring()
 
+  if (loading) {
+    return (
+      <p className="empty" role="status">
+        Загрузка результатов…
+      </p>
+    )
+  }
+
+  const site = sites.find((s) => s.id === id)
   if (site === undefined) {
     return (
-      <section>
+      <>
+        <title>Страница не найдена · Мониторинг сайтов группы</title>
         <Link to="/" className="back">← Все сайты</Link>
-        <p className="empty">Сайта с номером {id} нет в списке.</p>
-      </section>
+        <p className="empty">
+          Сайта «{id}» нет в списке. <Link to="/">К списку сайтов</Link>
+        </p>
+      </>
     )
   }
 
@@ -22,7 +33,8 @@ function SitePage() {
   const maxMs = Math.max(...rows.map((row) => row.check?.ms ?? 0), 1)
 
   return (
-    <section>
+    <>
+      <title>{`${site.name} · Мониторинг сайтов группы`}</title>
       <Link to="/" className="back">← Все сайты</Link>
       <h2>{site.name}</h2>
       <p>
@@ -30,10 +42,10 @@ function SitePage() {
           {site.url}
         </a>
       </p>
-      <p className="summary">
-        Открывался в {okCount} из {rows.length} последних проверок · {percent}%
-      </p>
+      <p>Открывался в {okCount} из {rows.length} последних проверок.</p>
+      <p className="summary">{percent}% удачных проверок</p>
       <table className="history">
+        <caption>История проверок</caption>
         <thead>
           <tr>
             <th>Проверка</th>
@@ -56,7 +68,7 @@ function SitePage() {
           ))}
         </tbody>
       </table>
-    </section>
+    </>
   )
 }
 

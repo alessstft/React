@@ -5,7 +5,8 @@ function AboutPage() {
   const { sites, history } = useMonitoring()
 
   return (
-    <section>
+    <>
+      <title>О проверке · Мониторинг сайтов группы</title>
       <Link to="/" className="back">← Все сайты</Link>
       <h2>О проверке</h2>
       <p>Каждую ночь в 00:00 по Москве GitHub Actions запрашивает {sites.length} сайтов из списка.</p>
@@ -21,7 +22,7 @@ function AboutPage() {
         Сообщение в Telegram приходит только когда сайт перестал открываться или снова заработал.
         Токен бота и номер чата хранятся в секретах репозитория.
       </p>
-    </section>
+    </>
   )
 }
 

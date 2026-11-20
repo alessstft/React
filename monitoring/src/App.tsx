@@ -6,7 +6,7 @@ import AboutPage from './pages/AboutPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
-  const { history, loading, error } = useMonitoring()
+  const { history } = useMonitoring()
   const { pathname } = useLocation()
   const last = history[0]
 
@@ -30,16 +30,12 @@ function App() {
         </nav>
       </header>
       <main className="main">
-        {error !== '' && <p className="load-error">{error}</p>}
-        {loading && <p className="empty">Загрузка данных…</p>}
-        {!loading && error === '' && (
-          <Routes>
-            <Route path="/" element={<SitesPage />} />
-            <Route path="/site/:id" element={<SitePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        )}
+        <Routes>
+          <Route path="/" element={<SitesPage />} />
+          <Route path="/site/:id" element={<SitePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </main>
     </>
   )
